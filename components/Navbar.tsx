@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
 interface NavbarProps {
-  onHomeClick: () => void;
+  onNavigate: (id: string) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onHomeClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -21,69 +21,64 @@ const Navbar: React.FC<NavbarProps> = ({ onHomeClick }) => {
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '#home', onClick: onHomeClick },
-    { name: 'About', href: '#about', onClick: onHomeClick },
-    { name: 'Products', href: '#products', onClick: onHomeClick },
-    { name: 'Technology', href: '#technology', onClick: onHomeClick },
-    { name: 'Applications', href: '#applications', onClick: onHomeClick },
-    { name: 'Contact', href: '#contact', onClick: onHomeClick },
+    { name: 'Home', href: '#home' },
+    { name: 'Products', href: '#products' },
+    { name: 'Tech', href: '#technology' },
+    { name: 'Contact', href: '#contact' },
   ];
 
-  const handleLinkClick = (onClick?: () => void) => {
-    if (onClick) onClick();
+  const handleAction = (href: string) => {
     setIsOpen(false);
+    onNavigate(href);
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass-effect py-2 border-b border-white/10 shadow-2xl' : 'bg-transparent py-4'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'glass-effect py-4 border-b border-slate-100 shadow-xl shadow-slate-900/5' : 'bg-transparent py-8'}`}>
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
-        <a href="#home" onClick={() => handleLinkClick(onHomeClick)} className="flex items-center group">
+        <button onClick={() => handleAction('#home')} className="flex items-center group relative z-50">
           {!logoError ? (
             <motion.img 
               src="/images/logo.png" 
               alt="Harish Solar Logo" 
-              className="h-14 md:h-20 w-auto object-contain brightness-125 contrast-125"
+              className="h-10 md:h-14 w-auto object-contain"
               whileHover={{ scale: 1.05 }}
               onError={() => setLogoError(true)}
             />
           ) : (
-            <div className="flex items-center space-x-2">
-              <div className="bg-yellow-400 p-2 rounded-xl shadow-lg shadow-yellow-400/20">
-                <span className="text-black font-black text-xl">HS</span>
+            <div className="flex items-center space-x-3">
+              <div className="bg-yellow-400 p-2 rounded-xl shadow-lg">
+                <span className="text-black font-black text-lg">HS</span>
               </div>
-              <span className="text-2xl font-black tracking-tighter">HARISH <span className="text-yellow-400">SOLAR</span></span>
+              <span className="text-xl font-black tracking-tighter text-slate-900 uppercase">Harish<span className="text-yellow-500">Solar</span></span>
             </div>
           )}
-        </a>
+        </button>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center space-x-10">
+        <div className="hidden md:flex items-center space-x-12">
           {navLinks.map((link) => (
-            <a 
+            <button 
               key={link.name} 
-              href={link.href} 
-              onClick={() => handleLinkClick(link.onClick)}
-              className="text-[10px] font-black text-gray-400 hover:text-yellow-400 transition-colors uppercase tracking-[0.2em]"
+              onClick={() => handleAction(link.href)}
+              className="text-[10px] font-black text-slate-400 hover:text-yellow-600 transition-colors uppercase tracking-[0.3em]"
             >
               {link.name}
-            </a>
+            </button>
           ))}
-          <a 
-            href="#contact" 
-            onClick={() => handleLinkClick(onHomeClick)}
-            className="px-8 py-3 bg-yellow-400 text-black text-[10px] font-black rounded-full hover:bg-yellow-300 transition-all shadow-xl shadow-yellow-400/20 uppercase tracking-widest"
+          <button 
+            onClick={() => handleAction('#contact')}
+            className="px-8 py-3.5 bg-slate-900 text-white text-[10px] font-black rounded-2xl hover:bg-yellow-500 hover:text-black transition-all shadow-xl shadow-slate-900/10 uppercase tracking-[0.2em]"
           >
-            Enquire
-          </a>
+            Get Quote
+          </button>
         </div>
 
         {/* Mobile Toggle */}
         <button 
-          className="md:hidden text-white p-3 bg-white/5 rounded-2xl border border-white/10" 
+          className="md:hidden text-slate-900 p-3 bg-white rounded-xl border border-slate-100 shadow-lg relative z-50" 
           onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle Menu"
         >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
+          {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
@@ -91,29 +86,27 @@ const Navbar: React.FC<NavbarProps> = ({ onHomeClick }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden glass-effect border-b border-white/10 overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="md:hidden fixed inset-0 z-40 bg-white pt-32 p-8"
           >
-            <div className="flex flex-col p-8 space-y-6">
+            <div className="flex flex-col space-y-10">
               {navLinks.map((link) => (
-                <a 
+                <button 
                   key={link.name} 
-                  href={link.href} 
-                  onClick={() => handleLinkClick(link.onClick)}
-                  className="text-xl font-black text-gray-300 hover:text-yellow-400 transition-colors uppercase tracking-widest"
+                  onClick={() => handleAction(link.href)}
+                  className="text-4xl font-black text-slate-900 hover:text-yellow-500 transition-colors uppercase tracking-tight text-left"
                 >
                   {link.name}
-                </a>
+                </button>
               ))}
-              <a 
-                href="#contact" 
-                onClick={() => handleLinkClick(onHomeClick)}
-                className="w-full py-5 bg-yellow-400 text-black text-center font-black rounded-2xl shadow-xl shadow-yellow-400/10 uppercase tracking-widest"
+              <button 
+                onClick={() => handleAction('#contact')}
+                className="w-full py-6 btn-primary text-slate-900 text-center font-black rounded-[2rem] uppercase tracking-widest shadow-xl"
               >
-                ENQUIRE NOW
-              </a>
+                REQUEST QUOTE
+              </button>
             </div>
           </motion.div>
         )}

@@ -1,22 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, Mail, MapPin, ExternalLink, ChevronRight, Globe, Shield, Sun, Zap, ArrowLeft, Download, MessageSquare } from 'lucide-react';
-import Navbar from './components/Navbar';
-import Section from './components/Section';
-import ProductCard from './components/ProductCard';
-import ProductPage from './components/ProductPage';
-import { PRODUCTS, FEATURES, APPLICATIONS, CONTACT_INFO } from './constants';
-import { Product } from './types';
+import { Phone, Mail, MapPin, ChevronRight, Sun, Zap, Battery, Shield, Globe } from 'lucide-react';
+import Navbar from './components/Navbar.tsx';
+import Section from './components/Section.tsx';
+import ProductCard from './components/ProductCard.tsx';
+import ProductPage from './components/ProductPage.tsx';
+import { PRODUCTS, FEATURES, APPLICATIONS, CONTACT_INFO } from './constants.tsx';
+import { Product } from './types.ts';
 
 const App: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Handle browser back button or navigation resets
   useEffect(() => {
     const handleHashChange = () => {
       if (!window.location.hash.startsWith('#product-')) {
-        setSelectedProduct(null);
+        // Handle generic hash navigation if needed
       }
     };
     window.addEventListener('popstate', handleHashChange);
@@ -26,21 +25,27 @@ const App: React.FC = () => {
   const navigateToProduct = (product: Product) => {
     setSelectedProduct(product);
     window.scrollTo(0, 0);
-    // We don't change actual URL path to avoid routing issues, 
-    // but we can use hash if desired.
   };
 
-  const navigateHome = () => {
-    setSelectedProduct(null);
-    setTimeout(() => {
-      const element = document.getElementById('products');
+  const handleNav = (id: string) => {
+    // If we are on a product page, clear it first
+    if (selectedProduct) {
+      setSelectedProduct(null);
+      // Wait for the main page to render before scrolling
+      setTimeout(() => {
+        const element = document.getElementById(id.replace('#', ''));
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      // If already on main page, just scroll
+      const element = document.getElementById(id.replace('#', ''));
       element?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    }
   };
 
   return (
-    <div className="relative min-h-screen bg-black text-white selection:bg-yellow-400 selection:text-black font-['Inter']">
-      <Navbar onHomeClick={() => setSelectedProduct(null)} />
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 selection:bg-yellow-200 selection:text-yellow-900 font-['Inter']">
+      <Navbar onNavigate={handleNav} />
 
       <AnimatePresence mode="wait">
         {!selectedProduct ? (
@@ -49,12 +54,12 @@ const App: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4 }}
           >
             {/* Hero Section */}
-            <section id="home" className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 lg:px-24 overflow-hidden min-h-screen flex items-center scroll-mt-20">
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-yellow-400/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-green-500/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />
+            <section id="home" className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 lg:px-24 overflow-hidden min-h-[95vh] flex items-center scroll-mt-20">
+              <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-400/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-400/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />
               
               <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <motion.div
@@ -63,118 +68,64 @@ const App: React.FC = () => {
                   transition={{ duration: 0.8 }}
                   className="z-10"
                 >
-                  <div className="inline-flex items-center space-x-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full mb-6">
-                    <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <span className="text-xs font-bold uppercase tracking-widest text-gray-300">SMART LIGHTING TECH</span>
+                  <div className="inline-flex items-center space-x-2 bg-yellow-100 border border-yellow-200 px-4 py-2 rounded-full mb-8">
+                    <span className="flex h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-yellow-700">Premium Solar Solutions</span>
                   </div>
-                  <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
+                  <h1 className="text-5xl md:text-8xl font-black mb-8 leading-[1.1] tracking-tight text-slate-900">
                     Lighting India's Future, <br />
-                    <span className="solar-gradient">One Street at a Time.</span>
+                    <span className="solar-gradient-text">Sustainable</span> <br />
+                    Technology.
                   </h1>
-                  <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-xl leading-relaxed">
-                    Smart, sustainable solar street lighting solutions designed from the heart of Rajasthan with advanced engineering.
+                  <p className="text-lg md:text-2xl text-slate-500 mb-12 max-w-xl leading-relaxed">
+                    Premium solar street lighting solutions for Indian infrastructure, featuring smart, sustainable, and reliable technology.
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <a href="#products" className="px-8 py-4 bg-yellow-400 text-black font-bold rounded-lg flex items-center justify-center hover:bg-yellow-300 transition-all shadow-[0_0_20px_rgba(250,204,21,0.2)] uppercase tracking-wider">
-                      View Catalog <ChevronRight size={20} className="ml-2" />
-                    </a>
-                    <a href="#contact" className="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-lg flex items-center justify-center hover:bg-white/10 transition-all uppercase tracking-wider">
+                  <div className="flex flex-col sm:flex-row gap-5">
+                    <button onClick={() => handleNav('#products')} className="px-10 py-5 btn-primary text-slate-900 font-black rounded-2xl flex items-center justify-center transition-all uppercase tracking-wider text-sm">
+                      View Catalog <ChevronRight size={18} className="ml-2" />
+                    </button>
+                    <button onClick={() => handleNav('#contact')} className="px-10 py-5 bg-white border border-slate-200 text-slate-700 font-bold rounded-2xl flex items-center justify-center hover:bg-slate-50 transition-all uppercase tracking-wider text-sm shadow-sm hover:shadow-md">
                       Get a Quote
-                    </a>
+                    </button>
                   </div>
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, rotateY: -30, rotateX: 10 }}
-                  animate={{ opacity: 1, rotateY: 0, rotateX: 0 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 1.2, ease: "easeOut" }}
-                  style={{ perspective: 1000 }}
                   className="relative flex justify-center lg:justify-end"
                 >
                   <motion.div 
                     animate={{ 
-                      y: [0, -25, 0],
-                      rotateY: [-5, 5, -5],
-                      rotateX: [2, -2, 2]
+                      y: [0, -20, 0],
                     }}
                     transition={{ 
                       repeat: Infinity, 
                       duration: 6, 
                       ease: "easeInOut" 
                     }}
-                    className="relative z-10 w-full max-w-md aspect-square bg-gradient-to-br from-white/10 to-transparent rounded-[3rem] border border-white/20 flex items-center justify-center p-12 backdrop-blur-md shadow-2xl"
-                    style={{ transformStyle: 'preserve-3d' }}
+                    className="relative z-10 w-full max-w-md aspect-square bg-white rounded-[4rem] border border-slate-200 flex items-center justify-center p-12 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] overflow-visible"
                   >
                     <img 
                       src="/images/hs-60.png" 
                       alt="HS-60 Solar Light" 
-                      className="w-full h-full object-contain drop-shadow-[0_35px_60px_rgba(250,204,21,0.4)]"
-                      style={{ transform: 'translateZ(50px)' }}
+                      className="w-full h-full object-contain drop-shadow-[0_40px_60px_rgba(234,179,8,0.3)]"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600?text=HS-60';
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=HS-60';
                       }}
                     />
-                    <div 
-                      className="absolute -bottom-8 -left-8 bg-yellow-400 text-black p-5 rounded-3xl shadow-2xl"
-                      style={{ transform: 'translateZ(80px)' }}
-                    >
-                      <p className="text-xs font-bold uppercase opacity-60">Engineered Precision</p>
-                      <p className="text-2xl font-black">HS-60 SERIES</p>
+                    <div className="absolute -bottom-8 -right-8 bg-slate-900 text-white p-6 rounded-[2.5rem] shadow-2xl">
+                      <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Bestseller</p>
+                      <p className="text-3xl font-black text-yellow-400 tracking-tighter">HS-60</p>
                     </div>
                   </motion.div>
-                  <div className="absolute inset-0 bg-yellow-400/20 blur-[120px] rounded-full scale-75 opacity-50" />
                 </motion.div>
               </div>
             </section>
 
-            {/* About Section */}
-            <Section id="about" title="Engineering Excellence" subtitle="Born in Rajasthan, built for the world. We combine high-tech design with sustainable energy." lightBackground className="scroll-mt-20">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16 items-center">
-                 <motion.div
-                   initial={{ opacity: 0, x: -30 }}
-                   whileInView={{ opacity: 1, x: 0 }}
-                   viewport={{ once: true }}
-                   className="space-y-6 text-gray-300 leading-relaxed text-lg"
-                 >
-                    <p>
-                      Based in <strong>Jodhpur, Rajasthan</strong>, Harish Solar is a pioneer in the next generation of smart infrastructure. Our solar street lights are engineered using advanced simulation tools to ensure maximum durability in the toughest Indian climates.
-                    </p>
-                    <p>
-                      As part of the <strong>Harish Group</strong>, we bring 25 years of legacy in real estate and infrastructure to every product we manufacture. Reliability isn't just a promise; it's our core DNA.
-                    </p>
-                    <div className="pt-4 grid grid-cols-2 gap-6">
-                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                        <p className="text-3xl font-black text-yellow-400">10k+</p>
-                        <p className="text-xs uppercase font-bold text-gray-500">Lights Installed</p>
-                      </div>
-                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                        <p className="text-3xl font-black text-green-500">25yr</p>
-                        <p className="text-xs uppercase font-bold text-gray-500">Group Legacy</p>
-                      </div>
-                    </div>
-                 </motion.div>
-                 
-                 <div className="relative group" style={{ perspective: 1200 }}>
-                   <motion.div
-                     whileHover={{ rotateY: -10, rotateX: 5, scale: 1.02 }}
-                     transition={{ type: 'spring', stiffness: 100 }}
-                     className="relative rounded-3xl overflow-hidden aspect-video border border-white/10 shadow-2xl"
-                     style={{ transformStyle: 'preserve-3d' }}
-                   >
-                     <img src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&q=80" alt="Solar Project" className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110" />
-                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                     <div className="absolute bottom-6 left-6" style={{ transform: 'translateZ(30px)' }}>
-                        <p className="text-yellow-400 font-bold uppercase tracking-widest text-xs mb-1">Modern Infrastructure</p>
-                        <p className="text-xl font-bold">Smart City Solutions</p>
-                     </div>
-                   </motion.div>
-                 </div>
-              </div>
-            </Section>
-
-            {/* Products Section */}
-            <Section id="products" title="Our Smart Catalog" subtitle="Interactive models of our high-performance solar range. Click any product to explore detailed specs and 360° views." className="scroll-mt-20">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <Section id="products" title="Our Catalog" subtitle="Explore our high-performance solar range." className="scroll-mt-20">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                 {PRODUCTS.map((product, index) => (
                   <ProductCard 
                     key={product.id} 
@@ -186,8 +137,7 @@ const App: React.FC = () => {
               </div>
             </Section>
 
-            {/* Technology */}
-            <Section id="technology" title="Integrated Technology" subtitle="Beyond simple lighting. We integrate the world's most reliable components." lightBackground className="scroll-mt-20">
+            <Section id="technology" title="Smart Technology" subtitle="Built with the world's most reliable components." lightBackground className="scroll-mt-20">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {FEATURES.map((feature, index) => (
                   <motion.div
@@ -196,50 +146,67 @@ const App: React.FC = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="p-8 rounded-[2rem] bg-black border border-white/5 hover:border-yellow-400/30 transition-all group relative overflow-hidden"
+                    className="p-10 rounded-[2.5rem] bg-white border border-slate-100 hover:border-yellow-300 transition-all group shadow-sm hover:shadow-xl hover:-translate-y-1"
                   >
-                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-yellow-400/5 blur-3xl rounded-full group-hover:bg-yellow-400/10 transition-colors" />
-                    <div className="mb-6 bg-white/5 w-16 h-16 rounded-2xl flex items-center justify-center group-hover:bg-yellow-400/10 transition-colors">
+                    <div className="mb-6 bg-slate-50 w-16 h-16 rounded-2xl flex items-center justify-center group-hover:bg-yellow-100 transition-colors">
                       {feature.icon}
                     </div>
-                    <h4 className="text-xl font-bold mb-3 group-hover:text-yellow-400 transition-colors">{feature.title}</h4>
-                    <p className="text-gray-400 text-sm leading-relaxed">{feature.description}</p>
+                    <h4 className="text-xl font-bold mb-3 text-slate-800 group-hover:text-yellow-600 transition-colors">{feature.title}</h4>
+                    <p className="text-slate-500 text-sm leading-relaxed">{feature.description}</p>
                   </motion.div>
                 ))}
               </div>
             </Section>
 
-            {/* Contact */}
-            <Section id="contact" title="Project Inquiry" subtitle="Let our experts design the perfect lighting layout for your infrastructure needs." className="scroll-mt-20">
+            <Section id="contact" title="Get In Touch" subtitle="Contact us for infrastructure needs." className="scroll-mt-20">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
                 <div className="space-y-10">
-                  <div className="p-8 bg-white/5 rounded-3xl border border-white/10 hover:border-yellow-400/20 transition-all">
-                    <h3 className="text-2xl font-bold mb-6">Connect with Sales</h3>
-                    <div className="space-y-6">
-                      <div className="flex items-center space-x-4">
-                        <div className="bg-yellow-400/10 p-3 rounded-xl"><Phone className="text-yellow-400" /></div>
-                        <a href={`tel:${CONTACT_INFO.phone}`} className="text-lg font-bold hover:text-yellow-400 transition-colors">{CONTACT_INFO.phone}</a>
+                  <div className="p-10 bg-white rounded-[3rem] border border-slate-200 shadow-xl shadow-slate-200/50">
+                    <h3 className="text-3xl font-black mb-10 tracking-tight">Direct Support</h3>
+                    <div className="space-y-8">
+                      <div className="flex items-center space-x-6">
+                        <div className="bg-yellow-100 p-5 rounded-2xl text-yellow-600"><Phone size={24} /></div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Call Us</p>
+                          <a href={`tel:${CONTACT_INFO.phone}`} className="text-xl font-bold hover:text-yellow-600 transition-colors">{CONTACT_INFO.phone}</a>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="bg-yellow-400/10 p-3 rounded-xl"><Mail className="text-yellow-400" /></div>
-                        <a href={`mailto:${CONTACT_INFO.email}`} className="text-lg font-bold hover:text-yellow-400 transition-colors break-all">{CONTACT_INFO.email}</a>
+                      <div className="flex items-center space-x-6">
+                        <div className="bg-blue-100 p-5 rounded-2xl text-blue-600"><Mail size={24} /></div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Email</p>
+                          <a href={`mailto:${CONTACT_INFO.email}`} className="text-xl font-bold hover:text-blue-600 transition-colors break-all">{CONTACT_INFO.email}</a>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="bg-yellow-400/10 p-3 rounded-xl"><MapPin className="text-yellow-400" /></div>
-                        <p className="text-lg font-bold">{CONTACT_INFO.address}</p>
+                      <div className="flex items-center space-x-6">
+                        <div className="bg-green-100 p-5 rounded-2xl text-green-600"><MapPin size={24} /></div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Headquarters</p>
+                          <p className="text-xl font-bold">{CONTACT_INFO.address}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 md:p-12">
-                  <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <input type="text" placeholder="Name" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-400 transition-colors" />
-                      <input type="tel" placeholder="Phone" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-400 transition-colors" />
+                <div className="bg-white border border-slate-200 rounded-[3rem] p-10 md:p-14 shadow-2xl shadow-slate-200/50">
+                  <h4 className="text-2xl font-bold mb-8 text-slate-800">Inquiry Form</h4>
+                  <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+                    <div className="grid grid-cols-1 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">Full Name</label>
+                        <input type="text" placeholder="John Doe" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-5 focus:outline-none focus:border-yellow-400 focus:bg-white transition-all shadow-inner" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">Phone Number</label>
+                        <input type="tel" placeholder="+91..." className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-5 focus:outline-none focus:border-yellow-400 focus:bg-white transition-all shadow-inner" />
+                      </div>
                     </div>
-                    <textarea rows={4} placeholder="Tell us about your project..." className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-400 transition-colors resize-none"></textarea>
-                    <button className="w-full py-5 bg-yellow-400 text-black font-black rounded-2xl hover:bg-yellow-300 transition-all uppercase tracking-widest shadow-xl shadow-yellow-400/10">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">Message</label>
+                      <textarea rows={4} placeholder="Tell us about your project requirements..." className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-5 focus:outline-none focus:border-yellow-400 focus:bg-white transition-all resize-none shadow-inner"></textarea>
+                    </div>
+                    <button className="w-full py-6 btn-secondary text-white font-black rounded-[2rem] transition-all uppercase tracking-[0.2em] text-sm">
                       Send Inquiry
                     </button>
                   </form>
@@ -251,22 +218,22 @@ const App: React.FC = () => {
           <ProductPage 
             key="product-page" 
             product={selectedProduct} 
-            onBack={navigateHome} 
+            onBack={() => setSelectedProduct(null)} 
           />
         )}
       </AnimatePresence>
 
-      <footer className="bg-black py-20 px-6 border-t border-white/5">
+      <footer className="bg-white py-24 px-6 border-t border-slate-100">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
-          <img src="/images/logo.png" alt="Logo" className="h-20 mb-8 opacity-60 grayscale hover:grayscale-0 transition-all" />
-          <div className="flex flex-wrap justify-center gap-10 mb-12 text-sm font-bold uppercase tracking-widest text-gray-500">
-            <a href="#home" onClick={() => setSelectedProduct(null)} className="hover:text-yellow-400">Home</a>
-            <a href="#about" onClick={() => setSelectedProduct(null)} className="hover:text-yellow-400">About</a>
-            <a href="#products" onClick={() => setSelectedProduct(null)} className="hover:text-yellow-400">Products</a>
-            <a href="#contact" onClick={() => setSelectedProduct(null)} className="hover:text-yellow-400">Contact</a>
+          <img src="/images/logo.png" alt="Logo" className="h-16 mb-12 grayscale opacity-40" />
+          <div className="flex flex-wrap justify-center gap-12 mb-16 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+            <button onClick={() => handleNav('#home')} className="hover:text-yellow-600 transition-colors">Home</button>
+            <button onClick={() => handleNav('#products')} className="hover:text-yellow-600 transition-colors">Products</button>
+            <button onClick={() => handleNav('#technology')} className="hover:text-yellow-600 transition-colors">Tech</button>
+            <button onClick={() => handleNav('#contact')} className="hover:text-yellow-600 transition-colors">Contact</button>
           </div>
-          <p className="text-gray-700 text-[10px] uppercase tracking-[0.2em] font-black">
-            &copy; {new Date().getFullYear()} Harish Solar Systems. Rajasthan, India.
+          <p className="text-slate-300 text-[9px] uppercase tracking-[0.4em] font-black text-center max-w-lg leading-loose">
+            HARISH SOLAR SYSTEMS &copy; {new Date().getFullYear()}. Rajasthan's Premier Infrastructure Partner.
           </p>
         </div>
       </footer>

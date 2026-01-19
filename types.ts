@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface ProductSpec {
@@ -9,6 +10,7 @@ export interface Product {
   id: string;
   name: string;
   image: string;
+  backImage: string;
   description: string;
   specs: string[];
   details: ProductSpec[];

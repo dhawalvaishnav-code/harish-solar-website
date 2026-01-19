@@ -1,8 +1,8 @@
 
-import React, { useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowLeft, ShieldCheck, Download, MessageSquare, Sun, Battery, CheckCircle2, ChevronRight } from 'lucide-react';
-import { Product } from '../types';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, ShieldCheck, MessageSquare, Sun, Battery, CheckCircle2, ChevronRight, Eye, Loader2 } from 'lucide-react';
+import { Product } from '../types.ts';
 
 interface ProductPageProps {
   product: Product;
@@ -10,178 +10,200 @@ interface ProductPageProps {
 }
 
 const ProductPage: React.FC<ProductPageProps> = ({ product, onBack }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [currentView, setCurrentView] = useState<'front' | 'back'>('front');
+  const [isImageLoading, setIsImageLoading] = useState(true);
   
-  // Hook into scroll position for the image transition effect
-  const { scrollY } = useScroll();
-  
-  // Transform scroll position to blur, opacity, and scale for mobile immersion
-  // Effects kick in after 50px and reach max at 400px scroll
-  const imageBlur = useTransform(scrollY, [50, 400], [0, 15]);
-  const imageOpacity = useTransform(scrollY, [50, 400], [1, 0.15]);
-  const imageScale = useTransform(scrollY, [50, 400], [1, 0.8]);
-  const imageSaturate = useTransform(scrollY, [50, 400], [1, 0]);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [product]);
 
+  // Reset loading state when view or product changes
+  useEffect(() => {
+    setIsImageLoading(true);
+  }, [currentView, product.id]);
+
+  const activeImage = currentView === 'front' ? product.image : product.backImage;
+
   return (
     <motion.div
-      ref={containerRef}
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen pt-32 pb-20 px-6 md:px-12 lg:px-24"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="min-h-screen pt-32 pb-32 px-6 md:px-12 lg:px-24 bg-white"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
         <button 
           onClick={onBack}
-          className="group flex items-center space-x-3 text-gray-400 hover:text-yellow-400 transition-colors mb-12 uppercase text-xs font-black tracking-widest"
+          className="group flex items-center space-x-4 text-slate-400 hover:text-slate-900 transition-all mb-20 uppercase text-[10px] font-black tracking-[0.3em]"
         >
-          <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center group-hover:bg-yellow-400 group-hover:text-black transition-all">
-            <ArrowLeft size={18} />
+          <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-yellow-400 group-hover:text-black transition-all shadow-sm">
+            <ArrowLeft size={20} />
           </div>
-          <span>Back to Catalog</span>
+          <span>Back to catalog</span>
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
-          {/* 3D Product View Side */}
-          {/* On Mobile: This stays sticky but blurs/fades as text scrolls over it */}
-          <div className="sticky top-24 md:top-40 z-0 lg:z-10">
-            <motion.div 
-              style={{ 
-                filter: useTransform(imageBlur, (v) => `blur(${v}px) saturate(${imageSaturate.get()})`),
-                opacity: imageOpacity,
-                scale: imageScale,
-                perspective: 1200
-              }}
-              className="relative aspect-square bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-[3rem] md:rounded-[4rem] flex items-center justify-center p-8 md:p-12 overflow-visible shadow-2xl"
-            >
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 pointer-events-none" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
+          <div className="lg:sticky lg:top-40">
+            <div className="relative aspect-square bg-slate-50 border border-slate-100 rounded-[4rem] flex items-center justify-center p-12 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] overflow-hidden">
               
-              <motion.div
-                initial={{ rotateY: -20, rotateX: 10, scale: 0.8 }}
-                animate={{ 
-                  rotateY: [0, 10, 0, -10, 0],
-                  rotateX: [0, 5, 0, -5, 0],
-                  y: [0, -20, 0],
-                  scale: 1
-                }}
-                transition={{ 
-                  duration: 10, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-                className="relative z-10 w-full h-full flex items-center justify-center"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-full h-full object-contain drop-shadow-[0_50px_100px_rgba(250,204,21,0.3)]"
-                  style={{ transform: 'translateZ(100px)' }}
-                />
-              </motion.div>
+              {/* Image Loading Skeleton */}
+              <AnimatePresence>
+                {isImageLoading && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-20 flex items-center justify-center bg-slate-50"
+                  >
+                    <div className="w-full h-full p-20 animate-pulse flex items-center justify-center">
+                       <div className="w-full h-full bg-slate-200/50 rounded-[3rem] relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                       </div>
+                    </div>
+                    <div className="absolute flex flex-col items-center">
+                       <Loader2 className="w-10 h-10 text-yellow-500 animate-spin mb-4" />
+                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Unit...</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-              {/* Decorative elements */}
-              <div className="absolute -top-10 -right-10 w-32 md:w-40 h-32 md:h-40 bg-yellow-400/10 blur-[80px] rounded-full animate-pulse" />
-              <div className="absolute -bottom-20 -left-20 w-48 md:w-60 h-48 md:h-60 bg-green-500/5 blur-[100px] rounded-full" />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentView}
+                  initial={{ opacity: 0, scale: 0.9, rotateY: 30 }}
+                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, rotateY: -30 }}
+                  transition={{ duration: 0.5 }}
+                  className="w-full h-full flex items-center justify-center"
+                >
+                  <img 
+                    src={activeImage} 
+                    alt={`${product.name} ${currentView}`}
+                    onLoad={() => setIsImageLoading(false)}
+                    className={`w-full h-full object-contain drop-shadow-[0_40px_60px_rgba(234,179,8,0.2)] transition-opacity duration-500 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
+                    onError={(e) => {
+                      setIsImageLoading(false);
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=Product+View';
+                    }}
+                  />
+                </motion.div>
+              </AnimatePresence>
               
-              <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end opacity-40">
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500">3D Interactive Model</p>
-                <div className="flex space-x-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-bounce" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-bounce [animation-delay:0.4s]" />
-                </div>
+              <div className="absolute top-10 right-10 flex space-x-2 z-30">
+                <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse delay-75" />
+                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse delay-150" />
               </div>
-            </motion.div>
+            </div>
 
-            {/* View selectors - Hidden when blurred on mobile for better focus */}
-            <motion.div 
-              style={{ opacity: imageOpacity }}
-              className="grid grid-cols-3 gap-4 mt-8"
-            >
-              {['Front', 'Top', 'Side'].map((view) => (
-                <button key={view} className="py-3 md:py-4 bg-white/5 border border-white/10 rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white hover:bg-white/10 transition-all">
-                  {view}
+            <div className="flex justify-center gap-6 mt-12">
+              {[
+                { id: 'front', label: 'Front View' },
+                { id: 'back', label: 'Rear View' }
+              ].map((view) => (
+                <button 
+                  key={view.id} 
+                  onClick={() => setCurrentView(view.id as any)}
+                  className={`flex items-center space-x-3 px-10 py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
+                    currentView === view.id 
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-xl' 
+                    : 'bg-white border-slate-100 text-slate-400 hover:text-slate-900 hover:border-slate-300'
+                  }`}
+                >
+                  <Eye size={16} />
+                  <span>{view.label}</span>
                 </button>
               ))}
-            </motion.div>
+            </div>
           </div>
 
-          {/* Details Side - This will scroll "on top" of the sticky image on mobile */}
-          <div className="space-y-12 relative z-10 mt-[-20vh] md:mt-0 pt-[25vh] lg:pt-0">
-            {/* Background mask for text readability on mobile when scrolling over the image */}
-            <div className="lg:hidden absolute inset-0 -z-10 bg-gradient-to-t from-black via-black to-transparent pointer-events-none opacity-90 rounded-t-[3rem]" />
-            
-            <div className="px-4 md:px-0">
-              <div className="flex items-center space-x-3 mb-4">
-                <span className="bg-yellow-400 text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">Premium Grade</span>
-                <span className="text-gray-500 text-xs font-bold uppercase tracking-widest">Model {product.id.toUpperCase()}</span>
+          <div className="space-y-16">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-center space-x-4 mb-8">
+                <span className="bg-yellow-100 text-yellow-700 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-yellow-200">Official Product</span>
+                <span className="text-slate-300 text-[10px] font-black uppercase tracking-widest">Model: {product.id.toUpperCase()}</span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">{product.name}</h1>
-              <p className="text-xl text-gray-400 leading-relaxed font-light">{product.description}</p>
-            </div>
+              <h1 className="text-5xl md:text-7xl font-black mb-8 text-slate-900 tracking-tighter leading-none">{product.name}</h1>
+              <p className="text-xl text-slate-500 leading-relaxed font-medium">{product.description}</p>
+            </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 md:px-0">
-              <div className="p-6 bg-white/5 border border-white/10 rounded-3xl flex items-start space-x-4 backdrop-blur-md">
-                <div className="bg-yellow-400/10 p-3 rounded-xl"><Sun className="text-yellow-400" /></div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            >
+              <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex items-start space-x-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white p-4 rounded-2xl shadow-sm text-yellow-500"><Sun size={24} /></div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Illumination</p>
-                  <p className="text-lg font-bold">OSRAM German Tech</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Illumination</p>
+                  <p className="text-xl font-bold text-slate-900">High Lumen LED</p>
                 </div>
               </div>
-              <div className="p-6 bg-white/5 border border-white/10 rounded-3xl flex items-start space-x-4 backdrop-blur-md">
-                <div className="bg-green-500/10 p-3 rounded-xl"><Battery className="text-green-500" /></div>
+              <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex items-start space-x-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white p-4 rounded-2xl shadow-sm text-green-500"><Battery size={24} /></div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Energy Storage</p>
-                  <p className="text-lg font-bold">LiFePO4 Cells</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Energy</p>
+                  <p className="text-xl font-bold text-slate-900">Long-life Battery</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Technical Data Table */}
-            <div className="px-4 md:px-0">
-              <h3 className="text-xl font-bold mb-6 flex items-center">
-                <ShieldCheck className="text-yellow-400 mr-3" /> Technical Specifications
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h3 className="text-xl font-black mb-10 flex items-center text-slate-900 uppercase tracking-tight">
+                <ShieldCheck className="text-yellow-500 mr-4" /> Technical Specifications
               </h3>
-              <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-lg">
+              <div className="bg-white border border-slate-100 rounded-[3rem] overflow-hidden shadow-2xl shadow-slate-900/5">
                 <table className="w-full text-left">
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-slate-100">
                     {product.details.map((detail, i) => (
-                      <tr key={i} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="px-6 md:px-8 py-5 text-gray-400 font-medium text-sm">{detail.feature}</td>
-                        <td className="px-6 md:px-8 py-5 font-bold text-sm text-right md:text-left">{detail.value}</td>
+                      <tr key={i} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-10 py-6 text-slate-400 font-bold text-[10px] uppercase tracking-widest border-r border-slate-50">{detail.feature}</td>
+                        <td className="px-10 py-6 font-black text-sm text-slate-900">{detail.value}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </div>
+            </motion.div>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 px-4 md:px-0">
-              <button className="flex-1 py-6 bg-yellow-400 text-black font-black rounded-3xl hover:bg-yellow-300 transition-all uppercase tracking-[0.2em] text-sm shadow-2xl shadow-yellow-400/20 flex items-center justify-center space-x-3 group">
-                <MessageSquare size={20} />
-                <span>Enquire Now</span>
-                <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="flex-1 py-6 bg-white/5 border border-white/10 text-white font-black rounded-3xl hover:bg-white/10 transition-all uppercase tracking-[0.2em] text-sm flex items-center justify-center space-x-3 backdrop-blur-md">
-                <Download size={20} />
-                <span>Datasheet</span>
-              </button>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-col gap-6 pt-10"
+            >
+              <a 
+                href="#contact"
+                className="w-full py-7 btn-secondary text-white font-black rounded-[2.5rem] transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center space-x-4 group"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onBack();
+                  setTimeout(() => {
+                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 300);
+                }}
+              >
+                <MessageSquare size={18} />
+                <span>Instant Quote</span>
+                <ChevronRight size={18} className="group-hover:translate-x-2 transition-transform" />
+              </a>
+            </motion.div>
 
-            {/* Trust Badges */}
-            <div className="flex justify-between items-center py-8 border-y border-white/5 px-4 md:px-0">
-              {['IP65 Rated', 'Remote Ready', '50k+ Life'].map((badge) => (
+            <div className="flex justify-between items-center py-10 border-t border-slate-100">
+              {['IP65 Rated', 'Remote Access', 'Maintenance Free'].map((badge) => (
                 <div key={badge} className="flex items-center space-x-2">
-                  <CheckCircle2 size={14} className="text-green-500" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{badge}</span>
+                  <CheckCircle2 size={16} className="text-green-500" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{badge}</span>
                 </div>
               ))}
             </div>
